@@ -29,6 +29,25 @@ int main(void)
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
+    float positions[6] = {
+        -0.5f, -0.5f,
+         0.0f,  0.5f,
+         0.5f, -0.5f
+	};
+
+    // remember that opengl is like a state machine, so everything you generate is assigned to a unique id which represents that specific shader
+	// then we can use that id to bind the shader and use it in our render loop
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -38,7 +57,7 @@ int main(void)
         glBegin(GL_TRIANGLES);
 		glVertex2f(-0.5f, -0.5f);
         glVertex2f(0.0f, 0.5f);
-        glVertex2f(00.5f, -0.5f);
+        glVertex2f(0.5f, -0.5f);
 		glEnd();
 
         /* Swap front and back buffers */
