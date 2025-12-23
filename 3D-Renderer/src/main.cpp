@@ -6,6 +6,23 @@
 #include <string>
 #include <sstream>
 
+#define ASSERT(x) if (!(x)) __debugbreak();
+
+static void GLClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogError()
+{
+    while (GLenum error = glGetError())
+    {
+        std::cout << "OpenGL Error: " << error << std::endl;
+        return false;
+    }
+    return true;
+}
+
 struct ShaderProgramSource
 {
     std::string VertexSource;
@@ -83,7 +100,6 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
 
 int main(void)
 {
-
     GLFWwindow* window;
 
     /* Initialize the library */
@@ -121,7 +137,8 @@ int main(void)
 
     // remember that opengl is like a state machine, so everything you generate is assigned to a unique id which represents that specific shader
 	// then we can use that id to bind the shader and use it in our render loop
-	// create vertex buffer (vbo)
+
+    // create vertex buffer (vbo)
     unsigned int vbo;
     glGenBuffers(1, &vbo);
 
@@ -150,7 +167,9 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        GLClearError();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        ASSERT(GLLogError());
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
