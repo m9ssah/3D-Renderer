@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <cmath>
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
@@ -26,6 +27,8 @@ static bool GLLogError(const char* function, const char* file, int line)
     }
     return true;
 }
+
+void processInput(GLFWwindow* window);
 
 struct ShaderProgramSource
 {
@@ -132,15 +135,17 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
     float positions[] = {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f,  0.5f,
-   		-0.5f,  0.5f
+        // positions              // colors
+        -0.5f, -0.5f,  0.0f,      0.8f, 0.2f, 0.9f,  
+         0.5f, -0.5f,  0.0f,      0.2f, 0.8f, 0.9f,
+         0.5f,  0.5f,  0.0f,      0.9f, 0.9f, 0.2f,
+        -0.5f,  0.5f,  0.0f,      0.9f, 0.2f, 0.4f 
+
 	};
 
     unsigned int indicies[] = {
         0, 1, 2,
-        2, 3, 0
+        2, 3, 0,   
     };
 
     // remember that opengl is like a state machine, so everything you generate is assigned to a unique id which represents that specific shader
@@ -156,17 +161,21 @@ int main(void)
 
     // start by copying vertecies array in a buffer so opengl can use it
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW));
 
-	// set the vertex attribute pointers
+	// set the vertex attribute pointers for position
     GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+    GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0));
+
+    // set the vertex attribute pointers for color
+    GLCall(glEnableVertexAttribArray(1));
+    GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(3 * sizeof(float))));
 
 	// create index buffer (ibo)
     unsigned int ibo;
     GLCall(glGenBuffers(1, &ibo));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(float), indicies, GL_STATIC_DRAW));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW));
 
     // use shader program
 	ShaderProgramSource shaderSource = ParseShader("res/shaders/basic.shader");
@@ -174,7 +183,7 @@ int main(void)
     GLCall(glUseProgram(shader));
 
     GLCall(int location = glGetUniformLocation(shader, "u_Color"));
-    ASSERT(location != -1);     // couldnt find uniform
+    //ASSERT(location != -1);     // couldnt find uniform
     GLCall(glUniform4f(location, 0.0f, 0.3f, 0.9f, 1.0f));
 
     GLCall(glBindVertexArray(0));
@@ -182,15 +191,16 @@ int main(void)
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
-    float r = 0.0f;
-    float increment = 0.5f;  // units per second
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        processInput(window);
+
         /* Render here */
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
+        float timeValue = glfwGetTime();
+        float r = sin(timeValue) / 3.0f + 0.5f;
         
         GLCall(glUseProgram(shader));
         GLCall(glUniform4f(location, r, 0.3f, 0.9f, 1.0f));
@@ -198,15 +208,7 @@ int main(void)
         GLCall(glBindVertexArray(vao));
         GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
 
-
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-
-        if (r > 1.0f)
-            increment = -0.5f;
-        else if (r < 0.0f)
-            increment = 0.5f;
-
-        r += increment * 0.016f;
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -219,4 +221,10 @@ int main(void)
 
     glfwTerminate();
     return 0;
+}
+
+void processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }
