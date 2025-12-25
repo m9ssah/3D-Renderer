@@ -110,6 +110,9 @@ int main(void)
     if (!glfwInit())
         return -1;
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
@@ -121,6 +124,7 @@ int main(void)
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
 
     if (glewInit() != GLEW_OK)
         std::cout << "Error!" << std::endl;
@@ -142,13 +146,17 @@ int main(void)
     // remember that opengl is like a state machine, so everything you generate is assigned to a unique id which represents that specific shader
 	// then we can use that id to bind the shader and use it in our render loop
 
+    unsigned int vao;
+    GLCall(glGenVertexArrays(1, &vao));
+    GLCall(glBindVertexArray(vao));
+
     // create vertex buffer (vbo)
     unsigned int vbo;
     GLCall(glGenBuffers(1, &vbo));
 
     // start by copying vertecies array in a buffer so opengl can use it
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
 
 	// set the vertex attribute pointers
     GLCall(glEnableVertexAttribArray(0));
@@ -167,15 +175,38 @@ int main(void)
 
     GLCall(int location = glGetUniformLocation(shader, "u_Color"));
     ASSERT(location != -1);     // couldnt find uniform
-    GLCall(glUniform4f(location, 0.9f, 0.3f, 0.9f, 1.0f));
+    GLCall(glUniform4f(location, 0.0f, 0.3f, 0.9f, 1.0f));
+
+    GLCall(glBindVertexArray(0));
+    GLCall(glUseProgram(0));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+    float r = 0.0f;
+    float increment = 0.5f;  // units per second
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+
+        
+        GLCall(glUseProgram(shader));
+        GLCall(glUniform4f(location, r, 0.3f, 0.9f, 1.0f));
+
+        GLCall(glBindVertexArray(vao));
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+
 
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+        if (r > 1.0f)
+            increment = -0.5f;
+        else if (r < 0.0f)
+            increment = 0.5f;
+
+        r += increment * 0.016f;
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
