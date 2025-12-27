@@ -11,6 +11,7 @@
 
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
+#include "VertexArray.h"
 
 void processInput(GLFWwindow* window);
 
@@ -138,17 +139,14 @@ int main(void)
         unsigned int vao;
         GLCall(glGenVertexArrays(1, &vao));
         GLCall(glBindVertexArray(vao));
-
-        // create vertex buffer (vbo)
+        
+        VertexArray va;
         VertexBuffer vb(positions, sizeof(positions));
 
-        // set the vertex attribute pointers for position
-        GLCall(glEnableVertexAttribArray(0));
-        GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0));
-
-        // set the vertex attribute pointers for color
-        GLCall(glEnableVertexAttribArray(1));
-        GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(3 * sizeof(float))));
+        VertexBufferLayout layout;
+        layout.Push<float>(3);  // Position attribute (x, y, z)
+        layout.Push<float>(3);  // Color attribute (r, g, b)
+        va.AddBuffer(vb, layout);
 
         // create index buffer (ibo)
         IndexBuffer ib(indicies, 6);
@@ -181,7 +179,7 @@ int main(void)
             GLCall(glUseProgram(shader));
             GLCall(glUniform4f(location, r, 0.3f, 0.9f, 1.0f));
 
-            GLCall(glBindVertexArray(vao));
+            va.Bind();
             ib.Bind();
 
             GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
