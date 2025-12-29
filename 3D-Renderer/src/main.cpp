@@ -14,6 +14,7 @@
 #include "VertexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 void processInput(GLFWwindow* window);
 
@@ -47,11 +48,11 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
     {
         float positions[] = {
-            // positions              // colors
-            -0.5f, -0.5f,  0.0f,      0.8f, 0.2f, 0.9f,
-             0.5f, -0.5f,  0.0f,      0.2f, 0.8f, 0.9f,
-             0.5f,  0.5f,  0.0f,      0.9f, 0.9f, 0.2f,
-            -0.5f,  0.5f,  0.0f,      0.9f, 0.2f, 0.4f
+            // positions                  // textures
+            -0.5f, -0.5f,  0.0f,          0.0f, 0.0f,
+             0.5f, -0.5f,  0.0f,          1.0f, 0.0f,
+             0.5f,  0.5f,  0.0f,          1.0f, 1.0f,
+            -0.5f,  0.5f,  0.0f,          0.0f, 1.0f
 
         };
 
@@ -68,11 +69,12 @@ int main(void)
         GLCall(glBindVertexArray(vao));
         
         VertexArray va;
-        VertexBuffer vb(positions, sizeof(positions));
+        VertexBuffer vb(positions, sizeof(positions));      // sizeof(float) * 4 * 9
 
         VertexBufferLayout layout;
-        layout.Push<float>(3);  // Position attribute (x, y, z)
-        layout.Push<float>(3);  // Color attribute (r, g, b)
+        layout.Push<float>(3);  // position attribute (x, y, z)
+        //layout.Push<float>(3);  // color attribute (r, g, b)
+        layout.Push<float>(2);  // texture attribute (u, v)
         va.AddBuffer(vb, layout);
 
         // create index buffer (ibo)
@@ -82,6 +84,10 @@ int main(void)
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.0f, 0.3f, 0.9f, 1.0f);
+
+        Texture texture("res/textures/glass-tile.jpg");
+        texture.Bind();
+        shader.SetUniform1i("u_Texture", 0);
 
         va.Unbind();
         shader.Unbind();
