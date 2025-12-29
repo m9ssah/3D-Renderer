@@ -61,6 +61,9 @@ int main(void)
             2, 3, 0,
         };
 
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));      // TEMP FIX
+        GLCall(glEnable(GL_BLEND));
+
         // remember that opengl is like a state machine, so everything you generate is assigned to a unique id which represents that specific shader
         // then we can use that id to bind the shader and use it in our render loop
 
