@@ -51,11 +51,11 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
     {
         float positions[] = {
-            // positions                // textures
-            -0.5f, -0.5f,  0.0f,        0.0f, 0.0f,
-             0.5f, -0.5f,  0.0f,        1.0f, 0.0f,
-             0.5f,  0.5f,  0.0f,        1.0f, 1.0f,
-            -0.5f,  0.5f,  0.0f,        0.0f, 1.0f,
+            // positions            // colors            // textures
+            -0.5f, -0.5f,  0.0f,    0.8f, 0.2f, 0.9f,    0.0f, 0.0f,
+             0.5f, -0.5f,  0.0f,    0.2f, 0.8f, 0.9f,    1.0f, 0.0f,
+             0.5f,  0.5f,  0.0f,    0.9f, 0.9f, 0.2f,    1.0f, 1.0f,
+            -0.5f,  0.5f,  0.0f,    0.9f, 0.2f, 0.4f,    0.0f, 1.0f
 
         };
 
@@ -64,7 +64,7 @@ int main(void)
             2, 3, 0,
         };
 
-        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));      // TEMP FIX
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         GLCall(glEnable(GL_BLEND));
 
         // remember that opengl is like a state machine, so everything you generate is assigned to a unique id which represents that specific shader
@@ -79,7 +79,7 @@ int main(void)
 
         VertexBufferLayout layout;
         layout.Push<float>(3);  // position attribute (x, y, z)
-        //layout.Push<float>(3);  // color attribute (r, g, b)
+        layout.Push<float>(3);  // color attribute (r, g, b)
         layout.Push<float>(2);  // texture attribute (u, v)
         va.AddBuffer(vb, layout);
 
