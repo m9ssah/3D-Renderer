@@ -95,8 +95,12 @@ int main(void)
         shader.SetUniformMat4f("u_MVP", proj);
 
         Texture texture("res/textures/glass-tile.jpg");
-        texture.Bind();
-        shader.SetUniform1i("u_Texture", 0);
+        texture.Bind(0);
+        shader.SetUniform1i("u_Texture0", 0);
+        
+        Texture texture2("res/textures/woaw.jpg");
+        texture2.Bind(1);
+        shader.SetUniform1i("u_Texture1", 1);
 
         va.Unbind();
         shader.Unbind();
@@ -117,6 +121,8 @@ int main(void)
             float r = sin(timeValue) / 3.0f + 0.5f;
 
             shader.Bind();
+            texture.Bind(0);
+            texture2.Bind(1);
             shader.SetUniform4f("u_Color", r, 0.3f, 0.9f, 1.0f);
 
             renderer.Draw(va, ib, shader);
