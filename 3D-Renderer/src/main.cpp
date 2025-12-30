@@ -5,7 +5,6 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <cmath>
 
 #include "Renderer.h"
 
@@ -18,6 +17,10 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 void processInput(GLFWwindow* window);
 
@@ -34,7 +37,7 @@ int main(void)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -51,11 +54,11 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
     {
         float positions[] = {
-            // positions            // colors            // textures
-            -0.5f, -0.5f,  0.0f,    0.8f, 0.2f, 0.9f,    0.0f, 0.0f,
-             0.5f, -0.5f,  0.0f,    0.2f, 0.8f, 0.9f,    1.0f, 0.0f,
-             0.5f,  0.5f,  0.0f,    0.9f, 0.9f, 0.2f,    1.0f, 1.0f,
-            -0.5f,  0.5f,  0.0f,    0.9f, 0.2f, 0.4f,    0.0f, 1.0f
+            // positions             // colors            // textures
+            -50.0f, -50.0f, 0.0f,    0.8f, 0.2f, 0.9f,    0.0f, 0.0f,
+             50.0f, -50.0f, 0.0f,    0.2f, 0.8f, 0.9f,    1.0f, 0.0f,
+             50.0f,  50.0f, 0.0f,    0.9f, 0.9f, 0.2f,    1.0f, 1.0f,
+            -50.0f,  50.0f, 0.0f,    0.9f, 0.2f, 0.4f,    0.0f, 1.0f
 
         };
 
@@ -86,13 +89,13 @@ int main(void)
         // create index buffer (ibo)
         IndexBuffer ib(indicies, 6);
 
-        glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+        glm::mat4 proj = glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-1, 0, 0));
 
         // use shader program
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.0f, 0.3f, 0.9f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", proj);
 
         Texture texture("res/textures/glass-tile.jpg");
         texture.Bind(0);
@@ -109,6 +112,17 @@ int main(void)
 
         Renderer renderer;
 
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.Fonts->AddFontDefault();
+        //io.Fonts->Build();
+
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+        ImGui::StyleColorsDark();
+
+        glm::vec3 translation (200, 200, 0);
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
@@ -117,6 +131,14 @@ int main(void)
             /* Render here */
             renderer.Clear();
 
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0), translation);
+            glm::mat4 mvp = proj * view * model;
+
+
             float timeValue = glfwGetTime();
             float r = sin(timeValue) / 3.0f + 0.5f;
 
@@ -124,8 +146,17 @@ int main(void)
             texture.Bind(0);
             texture2.Bind(1);
             shader.SetUniform4f("u_Color", r, 0.3f, 0.9f, 1.0f);
+            shader.SetUniformMat4f("u_MVP", mvp);
 
             renderer.Draw(va, ib, shader);
+
+            {
+                ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 1920.0f);
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            }
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
@@ -135,6 +166,9 @@ int main(void)
         }
 
     }
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwTerminate();
     return 0;
 }

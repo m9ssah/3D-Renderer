@@ -31,5 +31,5 @@ uniform sampler2D u_Texture1;
 void main()
 {
     vec4 texColor = mix(texture(u_Texture0, v_TexCoord), texture(u_Texture1, v_TexCoord), 0.5); // HARDCODED, TEMP FIX
-    color = texColor * vec4(u_Color, 1.0);
+    color = texColor;
 }
