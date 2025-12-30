@@ -16,6 +16,9 @@
 #include "Shader.h"
 #include "Texture.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 void processInput(GLFWwindow* window);
 
 int main(void)
@@ -48,11 +51,11 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
     {
         float positions[] = {
-            // positions                  // textures
-            -0.5f, -0.5f,  0.0f,          0.0f, 0.0f,
-             0.5f, -0.5f,  0.0f,          1.0f, 0.0f,
-             0.5f,  0.5f,  0.0f,          1.0f, 1.0f,
-            -0.5f,  0.5f,  0.0f,          0.0f, 1.0f
+            // positions                // textures
+            -0.5f, -0.5f,  0.0f,        0.0f, 0.0f,
+             0.5f, -0.5f,  0.0f,        1.0f, 0.0f,
+             0.5f,  0.5f,  0.0f,        1.0f, 1.0f,
+            -0.5f,  0.5f,  0.0f,        0.0f, 1.0f,
 
         };
 
@@ -83,10 +86,13 @@ int main(void)
         // create index buffer (ibo)
         IndexBuffer ib(indicies, 6);
 
+        glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+
         // use shader program
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.0f, 0.3f, 0.9f, 1.0f);
+        shader.SetUniformMat4f("u_MVP", proj);
 
         Texture texture("res/textures/glass-tile.jpg");
         texture.Bind();
