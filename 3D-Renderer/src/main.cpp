@@ -90,7 +90,7 @@ int main(void)
         IndexBuffer ib(indicies, 6);
 
         glm::mat4 proj = glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f);
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-1, 0, 0));
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
         // use shader program
         Shader shader("res/shaders/basic.shader");
@@ -121,7 +121,8 @@ int main(void)
         ImGui_ImplOpenGL3_Init("#version 330");
         ImGui::StyleColorsDark();
 
-        glm::vec3 translation (200, 200, 0);
+        glm::vec3 translationA (200, 200, 0);
+        glm::vec3 translationB (400, 200, 0);
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
@@ -135,23 +136,32 @@ int main(void)
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            glm::mat4 model = glm::translate(glm::mat4(1.0), translation);
-            glm::mat4 mvp = proj * view * model;
+            // first uniform
+            {
+                glm::mat4 model = glm::translate(glm::mat4(1.0), translationA);
+                glm::mat4 mvp = proj * view * model;
+                shader.Bind();
+                texture.Bind(0);
+                texture2.Bind(1);
+                shader.SetUniformMat4f("u_MVP", mvp);
 
-
-            float timeValue = glfwGetTime();
-            float r = sin(timeValue) / 3.0f + 0.5f;
-
-            shader.Bind();
-            texture.Bind(0);
-            texture2.Bind(1);
-            shader.SetUniform4f("u_Color", r, 0.3f, 0.9f, 1.0f);
-            shader.SetUniformMat4f("u_MVP", mvp);
-
-            renderer.Draw(va, ib, shader);
+                renderer.Draw(va, ib, shader);
+            }
 
             {
-                ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 1920.0f);
+                glm::mat4 model = glm::translate(glm::mat4(1.0), translationB);
+                glm::mat4 mvp = proj * view * model;
+                shader.Bind();
+                texture.Bind(0);
+                texture2.Bind(1);
+                shader.SetUniformMat4f("u_MVP", mvp);
+
+                renderer.Draw(va, ib, shader);
+            }
+
+            {
+                ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 1920.0f);
+                ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 1920.0f);
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             }
 
