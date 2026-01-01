@@ -24,6 +24,7 @@
 
 #include "tests/Test.h"
 #include "tests/TestClearColor.h"
+#include "tests/TestTexture2D.h"
 
 void processInput(GLFWwindow* window);
 
@@ -53,7 +54,8 @@ int main(void)
     if (glewInit() != GLEW_OK)
         std::cout << "Error!" << std::endl;
 
-	    std::cout << glGetString(GL_VERSION) << std::endl;
+    std::cout << glGetString(GL_VERSION) << std::endl;
+    {
 
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         GLCall(glEnable(GL_BLEND));
@@ -74,6 +76,7 @@ int main(void)
         currentTest = menuTest;
 
         menuTest->RegisterTest<test::TestClearColor>("Clear Color");
+        menuTest->RegisterTest<test::TestTexture2D>("2D Texture");
 
         while (!glfwWindowShouldClose(window))
         {
@@ -111,6 +114,7 @@ int main(void)
         {
             delete menuTest;
         }
+    }
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
