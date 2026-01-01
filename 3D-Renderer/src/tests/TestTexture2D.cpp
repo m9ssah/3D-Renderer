@@ -7,7 +7,8 @@ namespace test
 {
     TestTexture2D::TestTexture2D()
         : m_Proj(glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f)), m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
-          m_TranslationA(200, 200, 0), m_TranslationB(400, 200, 0)
+          m_TranslationA(200, 200, 0), m_TranslationB(400, 200, 0),
+          m_RotationA(0.0f), m_RotationB(0.0f), m_AutoRotateA(true), m_AutoRotateB(true), m_RotationSpeed(45.0f)
 	{
         float positions[] = 
         {
@@ -51,6 +52,20 @@ namespace test
 
 	void TestTexture2D::onUpdate(float deltaTime)
 	{
+        if (m_AutoRotateA)
+        {
+            m_RotationA += m_RotationSpeed * deltaTime;
+            if (m_RotationA > 360.0f)
+                m_RotationA -= 360.0f;
+        }
+
+
+		if (m_AutoRotateB)
+		{
+			m_RotationB += m_RotationSpeed * deltaTime;
+			if (m_RotationB > 360.0f)
+				m_RotationB -= 360.0f;
+		}
 	}
 
 	void TestTexture2D::onRender()
@@ -64,6 +79,7 @@ namespace test
 
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationA);
+            model = glm::rotate(model, glm::radians(m_RotationA), glm::vec3(0.0f, 0.0f, 1.0f));
             glm::mat4 mvp = m_Proj * m_View * model;
             m_Shader->Bind();
             m_Shader->SetUniformMat4f("u_MVP", mvp);
@@ -72,6 +88,7 @@ namespace test
         }
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationB);
+            model = glm::rotate(model, glm::radians(m_RotationB), glm::vec3(0.0f, 0.0f, 1.0f));
             glm::mat4 mvp = m_Proj * m_View * model;
             m_Shader->Bind();
             m_Shader->SetUniformMat4f("u_MVP", mvp);
@@ -83,7 +100,22 @@ namespace test
 	void TestTexture2D::onImGuiRender()
 	{
         ImGui::SliderFloat3("Translation A", &m_TranslationA.x, 0.0f, 1920.0f);
+        ImGui::SliderFloat("Rotation A", &m_RotationA, 0.0f, 360.0f);
+        ImGui::Checkbox("Auto Rotate A", &m_AutoRotateA);
+
+        ImGui::Separator();
+        
         ImGui::SliderFloat3("Translation B", &m_TranslationB.x, 0.0f, 1920.0f);
+        ImGui::SliderFloat("Rotation B", &m_RotationB, 0.0f, 360.0f);
+        ImGui::Checkbox("Auto Rotate B", &m_AutoRotateB);
+
+        ImGui::Separator();
+
+        if (m_AutoRotateA || m_AutoRotateB)
+            ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 180.0f);
+        
+        ImGui::Separator();
+        
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	}
 

@@ -54,7 +54,7 @@ GLint Shader::GetUniformLocation(const std::string& name) const
 {
     if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
         return m_UniformLocationCache[name];
-
+     
     GLCall(GLint location = glGetUniformLocation(m_RendererID, name.c_str()));
     if (location == -1)
         std::cout << "warning: uniform " << name << " doesnt exist" << std::endl;

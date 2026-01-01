@@ -78,8 +78,14 @@ int main(void)
         menuTest->RegisterTest<test::TestClearColor>("Clear Color");
         menuTest->RegisterTest<test::TestTexture2D>("2D Texture");
 
+        float lastFrame = 0.0f;
+
         while (!glfwWindowShouldClose(window))
         {
+            float currentFrame = (float)glfwGetTime();
+            float deltaTime = currentFrame - lastFrame;
+            lastFrame = currentFrame;
+
             processInput(window);
 
             renderer.Clear();
@@ -90,7 +96,7 @@ int main(void)
 
             if (currentTest)
             {
-                currentTest->onUpdate(0.0f);
+                currentTest->onUpdate(deltaTime);
                 currentTest->onRender();
                 ImGui::Begin("Test");
                 if (currentTest != menuTest && ImGui::Button("<-"))

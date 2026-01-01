@@ -31,6 +31,9 @@ namespace test {
 
 		glm::mat4 m_Proj, m_View;
 		glm::vec3 m_TranslationA, m_TranslationB;
+		float m_RotationA, m_RotationB;
+		bool m_AutoRotateA, m_AutoRotateB;
+		float m_RotationSpeed;
 	};
 
 }
