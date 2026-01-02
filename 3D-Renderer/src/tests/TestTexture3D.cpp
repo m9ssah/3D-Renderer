@@ -8,22 +8,51 @@ namespace test
     TestTexture3D::TestTexture3D()
         : m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -3.0f))), m_Proj(glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f)),
         m_TranslationA(0.0f, 0.0f, 0.0f), m_TranslationB(1.5f, 0.0f, 0.0f),
-        m_RotationA(0.0f), m_RotationB(0.0f), m_AutoRotateA(true), m_AutoRotateB(true), m_RotationSpeed(45.0f)
+        m_RotationA(0.0f), m_RotationB(0.0f), m_AutoRotateA(true), m_AutoRotateB(true), m_RotationSpeed(45.0f), m_Verticies(36)
     {
         float positions[] =
-        {
-            // positions             // colors            // textures
-            -0.5f, -0.5f, 0.0f,    0.8f, 0.2f, 0.9f,    0.0f, 0.0f,
-             0.5f, -0.5f, 0.0f,    0.2f, 0.8f, 0.9f,    1.0f, 0.0f,
-             0.5f,  0.5f, 0.0f,    0.9f, 0.9f, 0.2f,    1.0f, 1.0f,
-            -0.5f,  0.5f, 0.0f,    0.9f, 0.2f, 0.4f,    0.0f, 1.0f
-
-        };
-
-        unsigned int indicies[] =
-        {
-            0, 1, 2,
-            2, 3, 0,
+        {   // positions           // colors              // texture
+            -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+                                  
+            -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+                                  
+            -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+                                  
+             0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+                                  
+            -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+                                  
+            -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f,  0.0f,  0.0f,   0.0f, 1.0f
         };
 
         GLCall(glEnable(GL_BLEND));
@@ -38,7 +67,7 @@ namespace test
         layout.Push<float>(2);      // texture attribute (u, v)
         m_VAO->AddBuffer(*m_VB, layout);
 
-        m_IBO = std::make_unique<IndexBuffer>(indicies, 6);
+        //m_IBO = std::make_unique<IndexBuffer>(indicies, 6);
 
         m_Shader = std::make_unique<Shader>("res/shaders/basic.shader");
         m_Shader->Bind();
@@ -84,7 +113,7 @@ namespace test
             glm::mat4 mvp = m_Proj * m_View * model;      // order matters
             m_Shader->Bind();
             m_Shader->SetUniformMat4f("u_MVP", mvp);
-            renderer.Draw(*m_VAO, *m_IBO, *m_Shader);
+            renderer.DrawCube(*m_VAO, m_Verticies, *m_Shader);
         }
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationB);
@@ -92,7 +121,7 @@ namespace test
             glm::mat4 mvp = m_Proj * m_View * model;      // order matters
             m_Shader->Bind();
             m_Shader->SetUniformMat4f("u_MVP", mvp);
-            renderer.Draw(*m_VAO, *m_IBO, *m_Shader);
+            renderer.DrawCube(*m_VAO, m_Verticies, *m_Shader);
         }
     }
 

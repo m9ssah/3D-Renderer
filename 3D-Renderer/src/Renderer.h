@@ -18,5 +18,6 @@ class Renderer
 public:
     void Clear() const;
     void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
+    void DrawCube(const VertexArray& va, const GLint verticies, const Shader& shader) const;
 
 };
