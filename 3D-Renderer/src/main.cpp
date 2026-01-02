@@ -25,6 +25,7 @@
 #include "tests/Test.h"
 #include "tests/TestClearColor.h"
 #include "tests/TestTexture2D.h"
+#include "tests/TestTexture3D.h"
 
 void processInput(GLFWwindow* window);
 
@@ -77,6 +78,7 @@ int main(void)
 
         menuTest->RegisterTest<test::TestClearColor>("Clear Color");
         menuTest->RegisterTest<test::TestTexture2D>("2D Texture");
+        menuTest->RegisterTest<test::TestTexture3D>("3D Texture");
 
         float lastFrame = 0.0f;
 
