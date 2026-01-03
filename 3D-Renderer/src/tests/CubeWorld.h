@@ -5,6 +5,7 @@
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "Texture.h"
+#include "CameraController.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
