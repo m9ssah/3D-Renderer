@@ -12,7 +12,7 @@
 
 #include <memory>
 
-// TODO: try to make this into a solar system simulation instead of cube world
+// goal: solar system sim
 
 namespace test {
 
@@ -38,6 +38,7 @@ namespace test {
 		float m_Rotation;
 		bool m_AutoRotate;
 		float m_RotationSpeed;
+		float m_ElapsedTime;
 	};
 
 }

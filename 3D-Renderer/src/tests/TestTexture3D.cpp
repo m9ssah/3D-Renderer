@@ -108,16 +108,18 @@ namespace test
         m_Texture->Bind(0);
 
         {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationA);
-            model = glm::rotate(model, glm::radians(m_RotationA), glm::vec3(1.0f, 0.0f, 0.0f));
+            glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(m_RotationA), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::translate(model, m_TranslationA);
+            model = glm::rotate(model, glm::radians(m_RotationA * 2.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // spin on own axis
             glm::mat4 mvp = m_Proj * m_View * model;      // order matters
             m_Shader->Bind();
             m_Shader->SetUniformMat4f("u_MVP", mvp);
             renderer.DrawCube(*m_VAO, m_Verticies, *m_Shader);
         }
         {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationB);
-            model = glm::rotate(model, glm::radians(m_RotationB), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(m_RotationB), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::translate(model, m_TranslationB);
+            model = glm::rotate(model, glm::radians(m_RotationB * 2.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // spin on own axis
             glm::mat4 mvp = m_Proj * m_View * model;      // order matters
             m_Shader->Bind();
             m_Shader->SetUniformMat4f("u_MVP", mvp);

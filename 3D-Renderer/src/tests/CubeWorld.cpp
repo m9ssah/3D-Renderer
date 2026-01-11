@@ -8,7 +8,7 @@ namespace test
     CubeWorld::CubeWorld()
         : m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -3.0f))), m_Proj(glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f)),
         m_Translation(0.0f, 0.0f, 0.0f),
-        m_Rotation(0.0f), m_AutoRotate(true), m_RotationSpeed(45.0f), m_Verticies(36)
+        m_Rotation(0.0f), m_AutoRotate(true), m_RotationSpeed(45.0f), m_Verticies(36), m_ElapsedTime(0.0f)
     {
         float positions[] =
         {   // positions           // colors              // texture
@@ -80,6 +80,8 @@ namespace test
 
     void CubeWorld::onUpdate(float deltaTime)
     {
+        m_ElapsedTime += deltaTime;
+        
         if (m_AutoRotate)
         {
             m_Rotation += m_RotationSpeed * deltaTime;
@@ -111,6 +113,12 @@ namespace test
             glm::vec3(-1.3f,   1.0f,  -1.5f)
         };
 
+        float radius = 10.0f;
+        float camX = static_cast<float>(sin(m_ElapsedTime) * radius);
+        float camZ = static_cast<float>(cos(m_ElapsedTime) * radius);
+        m_View = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        m_Shader->SetUniformMat4f("view", m_View);
+
         for (unsigned int i = 0; i < 10; i++)
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation + cubePositions[i]);
@@ -121,6 +129,7 @@ namespace test
             m_Shader->SetUniformMat4f("u_MVP", mvp);
             renderer.DrawCube(*m_VAO, m_Verticies, *m_Shader);
         }
+
     }
 
     void CubeWorld::onImGuiRender()
