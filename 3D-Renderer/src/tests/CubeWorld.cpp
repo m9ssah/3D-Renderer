@@ -6,7 +6,9 @@
 namespace test
 {
     CubeWorld::CubeWorld()
-        : m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -3.0f))), m_Proj(glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f)),
+        : m_Camera({ 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 0.0f }, -90.0f, 0.0f),
+        m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -3.0f))), 
+        m_Proj(glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f)),
         m_Translation(0.0f, 0.0f, 0.0f),
         m_Rotation(0.0f), m_AutoRotate(true), m_RotationSpeed(45.0f), m_Verticies(36), m_ElapsedTime(0.0f)
     {
@@ -113,10 +115,8 @@ namespace test
             glm::vec3(-1.3f,   1.0f,  -1.5f)
         };
 
-        float radius = 10.0f;
-        float camX = static_cast<float>(sin(m_ElapsedTime) * radius);
-        float camZ = static_cast<float>(cos(m_ElapsedTime) * radius);
-        m_View = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        m_View = m_Camera.GetViewMatrix();
+        m_Proj = glm::perspective(glm::radians(m_Camera.GetZoom()), 1920.0f / 1080.0f, 0.1f, 100.0f);
         m_Shader->SetUniformMat4f("view", m_View);
 
         for (unsigned int i = 0; i < 10; i++)
@@ -129,7 +129,6 @@ namespace test
             m_Shader->SetUniformMat4f("u_MVP", mvp);
             renderer.DrawCube(*m_VAO, m_Verticies, *m_Shader);
         }
-
     }
 
     void CubeWorld::onImGuiRender()
@@ -144,6 +143,10 @@ namespace test
             ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 180.0f);
 
         ImGui::Separator();
+
+        glm::vec3 camPos = m_Camera.GetPosition();
+        if (ImGui::SliderFloat3("Camera Position", &camPos.x, -20.0f, 20.0f))
+            m_Camera.SetPosition(camPos);
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     }

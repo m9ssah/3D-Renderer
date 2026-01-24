@@ -5,8 +5,7 @@
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "Texture.h"
-#include "CameraController.h"
-
+#include "Camera.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -25,6 +24,8 @@ namespace test {
 		void onUpdate(float deltaTime) override;
 		void onRender() override;
 		void onImGuiRender() override;
+
+		Camera& GetCamera() { return m_Camera; }
 	private:
 		std::unique_ptr<VertexArray> m_VAO;
 		std::unique_ptr<VertexBuffer> m_VB;
@@ -32,6 +33,7 @@ namespace test {
 		std::unique_ptr<Shader> m_Shader;
 		std::unique_ptr<Texture> m_Texture;
 
+		Camera m_Camera;
 		GLint m_Verticies;
 		glm::mat4 m_Proj, m_View;
 		glm::vec3 m_Translation;

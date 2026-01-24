@@ -14,6 +14,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Camera.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -28,7 +29,18 @@
 #include "tests/TestTexture3D.h"
 #include "tests/CubeWorld.h"
 
+// Camera - global or accessible pointer for callbacks
+Camera* g_Camera = nullptr;
+
+float g_DeltaTime = 0.0f;
+
+bool g_FirstMouse = true;
+float g_LastX = 960.0f;
+float g_LastY = 540.0f;
+
 void processInput(GLFWwindow* window);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main(void)
 {
@@ -90,6 +102,17 @@ int main(void)
             float currentFrame = (float)glfwGetTime();
             float deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
+            g_DeltaTime = deltaTime;
+
+            test::CubeWorld* cubeWorld = dynamic_cast<test::CubeWorld*>(currentTest);
+            if (cubeWorld)
+            {
+                g_Camera = &cubeWorld->GetCamera();
+            }
+            else
+            {
+                g_Camera = nullptr;
+            }
 
             processInput(window);
 
@@ -138,4 +161,46 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (g_Camera)
+    {
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            g_Camera->onKeyboard(FORWARD, g_DeltaTime);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            g_Camera->onKeyboard(BACKWARD, g_DeltaTime);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            g_Camera->onKeyboard(LEFT, g_DeltaTime);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            g_Camera->onKeyboard(RIGHT, g_DeltaTime);
+    }
+}
+
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    if (!g_Camera)
+        return;
+
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (g_FirstMouse)
+    {
+        g_LastX = xpos;
+        g_LastY = ypos;
+        g_FirstMouse = false;
+    }
+
+    float xoffset = xpos - g_LastX;
+    float yoffset = g_LastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    g_LastX = xpos;
+    g_LastY = ypos;
+
+    g_Camera->onMouse(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if (g_Camera)
+        g_Camera->onScroll(static_cast<float>(yoffset));
 }
