@@ -35,8 +35,8 @@ Camera* g_Camera = nullptr;
 float g_DeltaTime = 0.0f;
 
 bool g_FirstMouse = true;
-float g_LastX = 960.0f;
-float g_LastY = 540.0f;
+float g_LastX = 1920.f / 2;
+float g_LastY = 1080.0f / 2;
 
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -54,6 +54,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
     if (!window)
@@ -64,6 +65,10 @@ int main(void)
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    // tell GLFW to capture our mouse
 
     if (glewInit() != GLEW_OK)
         std::cout << "Error!" << std::endl;
