@@ -18,7 +18,6 @@ namespace test
         m_Translation(0.0f, 0.0f, 0.0f),
         m_Rotation(0.0f), m_AutoRotate(true), m_RotationSpeed(45.0f), m_ElapsedTime(0.0f)
     {
-        // Generate sphere mesh data
         std::vector<float> vertices;
         std::vector<unsigned int> indices;
         GenerateSphere(0.5f, 36, 18, vertices, indices);
@@ -30,9 +29,9 @@ namespace test
         m_VAO = std::make_unique<VertexArray>();
         m_VB = std::make_unique<VertexBuffer>(vertices.data(), (unsigned int)(vertices.size() * sizeof(float)));
         VertexBufferLayout layout;
-        layout.Push<float>(3);      // position attribute (x, y, z)
-        layout.Push<float>(3);      // color attribute (r, g, b) -- kept as normals for consistency
-        layout.Push<float>(2);      // texture attribute (u, v)
+        layout.Push<float>(3);      // position attr (x, y, z)  
+        layout.Push<float>(3);      // color attr (r, g, b)
+        layout.Push<float>(2);      // texture attr (u, v)
         m_VAO->AddBuffer(*m_VB, layout);
 
         m_IBO = std::make_unique<IndexBuffer>(indices.data(), (unsigned int)indices.size());
@@ -40,7 +39,7 @@ namespace test
         m_Shader = std::make_unique<Shader>("res/shaders/basic.shader");
         m_Shader->Bind();
 
-        m_Texture = std::make_unique<Texture>("res/textures/glass-tile.jpg");
+        m_Texture = std::make_unique<Texture>("res/textures/4k_ceres_fictional.jpg");
         m_Shader->SetUniform1i("u_Texture", 0);
     }
 
@@ -51,10 +50,6 @@ namespace test
     void SolarSystem::GenerateSphere(float radius, unsigned int sectorCount, unsigned int stackCount,
         std::vector<float>& vertices, std::vector<unsigned int>& indices)
     {
-        // UV sphere generation:
-        // Walk from top pole (stack 0) to bottom pole (stack stackCount).
-        // At each stack, walk around the equator (sector 0 to sectorCount).
-        // Each vertex gets: position (x,y,z), normal (nx,ny,nz), texcoord (u,v).
 
         float sectorStep = 2.0f * (float)M_PI / (float)sectorCount;
         float stackStep  = (float)M_PI / (float)stackCount;
@@ -65,24 +60,24 @@ namespace test
             float xy = radius * cosf(stackAngle);
             float z  = radius * sinf(stackAngle);
 
-            for (unsigned int j = 0; j <= sectorCount; ++j)
+            for (int j = 0; j <= sectorCount; ++j)
             {
                 float sectorAngle = (float)j * sectorStep;       // from 0 to 2pi
 
-                // Position
-                float x = xy * cosf(sectorAngle);
-                float y = xy * sinf(sectorAngle);
+                // pos
+                float x = xy * cosf(sectorAngle);       // rcosucosv
+                float y = xy * sinf(sectorAngle);       // rcosusinv
 
-                // Normal (unit sphere direction, reused in color channel)
+                // normal
                 float nx = x / radius;
                 float ny = y / radius;
                 float nz = z / radius;
 
-                // Texture coordinates
+                // tex coords
                 float u = (float)j / (float)sectorCount;
                 float v = (float)i / (float)stackCount;
 
-                // Push: pos(3) + color/normal(3) + texcoord(2)  = 8 floats per vertex
+                // pos(3) + color/normal(3) + texcoord(2)  = 8 floats per vertex
                 vertices.push_back(x);
                 vertices.push_back(y);
                 vertices.push_back(z);
@@ -94,16 +89,15 @@ namespace test
             }
         }
 
-        // Generate triangle indices:
-        // Two triangles per quad, except at the poles where each quad degenerates to one triangle.
-        for (unsigned int i = 0; i < stackCount; ++i)
+        // 2 triangles per quad, except at the poles where each quad degenerates to one triangle.
+        for (int i = 0; i < stackCount; ++i)
         {
             unsigned int k1 = i * (sectorCount + 1);       // current stack start index
             unsigned int k2 = k1 + sectorCount + 1;        // next stack start index
 
-            for (unsigned int j = 0; j < sectorCount; ++j, ++k1, ++k2)
+            for (int j = 0; j < sectorCount; ++j, ++k1, ++k2)
             {
-                // First triangle of the quad (skip at top pole where it degenerates)
+                // first triangle of the quad (skip at top pole where it degenerates)
                 if (i != 0)
                 {
                     indices.push_back(k1);
@@ -111,7 +105,7 @@ namespace test
                     indices.push_back(k1 + 1);
                 }
 
-                // Second triangle of the quad (skip at bottom pole where it degenerates)
+                // second triangle of the quad (skip at bottom pole where it degenerates)
                 if (i != (stackCount - 1))
                 {
                     indices.push_back(k1 + 1);
