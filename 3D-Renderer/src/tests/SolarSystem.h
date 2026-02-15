@@ -10,14 +10,17 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <memory>
+#include <vector>
+
+// goal: solar system sim
 
 namespace test {
 
-	class CubeWorld : public Test
+	class SolarSystem : public Test
 	{
 	public:
-		CubeWorld();
-		~CubeWorld();
+		SolarSystem();
+		~SolarSystem();
 
 		void onUpdate(float deltaTime) override;
 		void onRender() override;
@@ -25,6 +28,9 @@ namespace test {
 
 		Camera& GetCamera() { return m_Camera; }
 	private:
+		void GenerateSphere(float radius, unsigned int sectorCount, unsigned int stackCount,
+			std::vector<float>& vertices, std::vector<unsigned int>& indices);
+
 		std::unique_ptr<VertexArray> m_VAO;
 		std::unique_ptr<VertexBuffer> m_VB;
 		std::unique_ptr<IndexBuffer> m_IBO;
@@ -32,7 +38,6 @@ namespace test {
 		std::unique_ptr<Texture> m_Texture;
 
 		Camera m_Camera;
-		GLint m_Verticies;
 		glm::mat4 m_Proj, m_View;
 		glm::vec3 m_Translation;
 		float m_Rotation;
@@ -40,5 +45,4 @@ namespace test {
 		float m_RotationSpeed;
 		float m_ElapsedTime;
 	};
-
 }

@@ -40,3 +40,12 @@ void Renderer::DrawCube(const VertexArray& va, const GLint verticies, const Shad
     GLCall(glDrawArrays(GL_TRIANGLES, 0, verticies));
 
 }
+
+void Renderer::DrawSphere(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
+{
+    shader.Bind();
+    va.Bind();
+    ib.Bind();
+
+    GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+}

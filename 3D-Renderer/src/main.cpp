@@ -28,6 +28,7 @@
 #include "tests/TestTexture2D.h"
 #include "tests/TestTexture3D.h"
 #include "tests/CubeWorld.h"
+#include "tests/SolarSystem.h"
 
 // Camera - global or accessible pointer for callbacks
 Camera* g_Camera = nullptr;
@@ -98,6 +99,7 @@ int main(void)
         menuTest->RegisterTest<test::TestTexture2D>("2D Texture");
         menuTest->RegisterTest<test::TestTexture3D>("3D Texture");
         menuTest->RegisterTest<test::CubeWorld>("Cube World");
+        menuTest->RegisterTest<test::SolarSystem>("Solar System");
 
 
         float lastFrame = 0.0f;
@@ -109,10 +111,10 @@ int main(void)
             lastFrame = currentFrame;
             g_DeltaTime = deltaTime;
 
-            test::CubeWorld* cubeWorld = dynamic_cast<test::CubeWorld*>(currentTest);
-            if (cubeWorld)
+            test::SolarSystem* solarsystem = dynamic_cast<test::SolarSystem*>(currentTest);
+            if (solarsystem)
             {
-                g_Camera = &cubeWorld->GetCamera();
+                g_Camera = &solarsystem->GetCamera();
             }
             else
             {
@@ -195,8 +197,8 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
         g_FirstMouse = false;
     }
 
-    float xoffset = xpos - g_LastX;
-    float yoffset = g_LastY - ypos; // reversed since y-coordinates go from bottom to top
+    float xoffset = (xpos - g_LastX);
+    float yoffset = (g_LastY - ypos); // reversed since y-coordinates go from bottom to top
 
     g_LastX = xpos;
     g_LastY = ypos;
