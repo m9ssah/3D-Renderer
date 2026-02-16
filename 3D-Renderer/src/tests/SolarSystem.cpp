@@ -41,6 +41,16 @@ namespace test
 
         m_Texture = std::make_unique<Texture>("res/textures/4k_ceres_fictional.jpg");
         m_Shader->SetUniform1i("u_Texture", 0);
+
+        std::vector<std::string> skyboxFaces = {
+            "res/textures/skybox1/right.jpg",
+            "res/textures/skybox1/left.jpg",
+            "res/textures/skybox1/top.jpg",
+            "res/textures/skybox1/bottom.jpg",
+            "res/textures/skybox1/front.jpg",
+            "res/textures/skybox1/back.jpg"
+        };
+        m_Skybox = std::make_unique<Skybox>(skyboxFaces);
     }
 
     SolarSystem::~SolarSystem()
@@ -92,8 +102,8 @@ namespace test
         // 2 triangles per quad, except at the poles where each quad degenerates to one triangle.
         for (int i = 0; i < stackCount; ++i)
         {
-            unsigned int k1 = i * (sectorCount + 1);       // current stack start index
-            unsigned int k2 = k1 + sectorCount + 1;        // next stack start index
+            int k1 = i * (sectorCount + 1);       // current stack start index
+            int k2 = k1 + sectorCount + 1;        // next stack start index
 
             for (int j = 0; j < sectorCount; ++j, ++k1, ++k2)
             {
@@ -135,6 +145,9 @@ namespace test
 
         Renderer renderer;
 
+        m_View = m_Camera.GetViewMatrix();
+        m_Proj = glm::perspective(glm::radians(m_Camera.GetZoom()), 1920.0f / 1080.0f, 0.1f, 100.0f);
+
         m_Texture->Bind(0);
 
         glm::vec3 planetPositions[] =
@@ -151,8 +164,6 @@ namespace test
             glm::vec3(-1.3f,   1.0f,  -1.5f)
         };
 
-        m_View = m_Camera.GetViewMatrix();
-        m_Proj = glm::perspective(glm::radians(m_Camera.GetZoom()), 1920.0f / 1080.0f, 0.1f, 100.0f);
         m_Shader->SetUniformMat4f("view", m_View);
 
         for (unsigned int i = 0; i < 10; i++)
@@ -165,6 +176,7 @@ namespace test
             m_Shader->SetUniformMat4f("u_MVP", mvp);
             renderer.DrawSphere(*m_VAO, *m_IBO, *m_Shader);
         }
+        m_Skybox->Draw(m_View, m_Proj);
     }
 
     void SolarSystem::onImGuiRender()

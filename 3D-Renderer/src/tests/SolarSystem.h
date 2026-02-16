@@ -6,6 +6,7 @@
 #include "VertexBufferLayout.h"
 #include "Texture.h"
 #include "Camera.h"
+#include "Skybox.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -36,6 +37,7 @@ namespace test {
 		std::unique_ptr<IndexBuffer> m_IBO;
 		std::unique_ptr<Shader> m_Shader;
 		std::unique_ptr<Texture> m_Texture;
+		std::unique_ptr<Skybox> m_Skybox;
 
 		Camera m_Camera;
 		glm::mat4 m_Proj, m_View;
