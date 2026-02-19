@@ -36,7 +36,7 @@ namespace test
 
         m_IBO = std::make_unique<IndexBuffer>(indices.data(), (unsigned int)indices.size());
 
-        m_Shader = std::make_unique<Shader>("res/shaders/basic.shader");
+        m_Shader = std::make_unique<Shader>("res/shaders/planet.shader");
         m_Shader->Bind();
 
         m_Texture = std::make_unique<Texture>("res/textures/4k_ceres_fictional.jpg");
@@ -174,6 +174,10 @@ namespace test
             glm::mat4 mvp = m_Proj * m_View * model;      // order matters
             m_Shader->Bind();
             m_Shader->SetUniformMat4f("u_MVP", mvp);
+            m_Shader->SetUniformMat4f("u_Model", model);
+            m_Shader->SetUniform3f("u_LightPos", glm::vec3(0.0f, 0.0f, 0.0f));
+            m_Shader->SetUniform3f("u_ViewPos", m_Camera.GetPosition());
+            m_Shader->SetUniform3f("u_LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
             renderer.DrawSphere(*m_VAO, *m_IBO, *m_Shader);
         }
         m_Skybox->Draw(m_View, m_Proj);

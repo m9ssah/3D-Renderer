@@ -511,6 +511,7 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="res\shaders\skybox.shader" />
+    <None Include="res\shaders\planet.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">
