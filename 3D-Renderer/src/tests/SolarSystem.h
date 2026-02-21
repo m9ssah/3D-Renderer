@@ -46,5 +46,13 @@ namespace test {
 		bool m_AutoRotate;
 		float m_RotationSpeed;
 		float m_ElapsedTime;
+
+		// performence monitoring
+		unsigned int m_GpuQueryID[2];	// double-buffered GPU timer queries
+		int m_QueryFrontIndex;
+		bool m_QueryReady;
+		float m_CpuFrameTimeMs;			// matrix math + draw call submission
+		float m_GpuFrameTimeMs;			// rendering
+		int m_SphereCount;
 	};
 }

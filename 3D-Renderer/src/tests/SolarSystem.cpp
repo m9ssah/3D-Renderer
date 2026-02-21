@@ -4,6 +4,7 @@
 #include "imgui/imgui.h"
 
 #include <cmath>
+#include <chrono>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -16,7 +17,9 @@ namespace test
         m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -3.0f))), 
         m_Proj(glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f)),
         m_Translation(0.0f, 0.0f, 0.0f),
-        m_Rotation(0.0f), m_AutoRotate(true), m_RotationSpeed(45.0f), m_ElapsedTime(0.0f)
+        m_Rotation(0.0f), m_AutoRotate(true), m_RotationSpeed(45.0f), m_ElapsedTime(0.0f),
+        m_QueryFrontIndex(0), m_QueryReady(false),
+        m_CpuFrameTimeMs(0.0f), m_GpuFrameTimeMs(0.0f), m_SphereCount(10)
     {
         std::vector<float> vertices;
         std::vector<unsigned int> indices;
@@ -51,10 +54,13 @@ namespace test
             "res/textures/skybox1/back.jpg"
         };
         m_Skybox = std::make_unique<Skybox>(skyboxFaces);
+
+        GLCall(glGenQueries(2, m_GpuQueryID));
     }
 
     SolarSystem::~SolarSystem()
     {
+        GLCall(glDeleteQueries(2, m_GpuQueryID));
     }
 
     void SolarSystem::GenerateSphere(float radius, unsigned int sectorCount, unsigned int stackCount,
@@ -140,6 +146,22 @@ namespace test
 
     void SolarSystem::onRender()
     {
+        // read prev frame timer result from front 
+        if (m_QueryReady)
+        {
+            GLuint64 gpuTimeNs = 0;
+            GLCall(glGetQueryObjectui64v(m_GpuQueryID[m_QueryFrontIndex], GL_QUERY_RESULT, &gpuTimeNs));
+            m_GpuFrameTimeMs = (float)gpuTimeNs / 1000000.0f;
+        }
+
+        // swap front back query indicies
+        int queryBackIndex = 1 - m_QueryFrontIndex;
+
+        GLCall(glBeginQuery(GL_TIME_ELAPSED, m_GpuQueryID[queryBackIndex]));
+
+
+        auto cpuStart = std::chrono::high_resolution_clock::now();
+
         GLCall(glClearColor(0.0f, 0.0f, 0.0f, 0.0f));
         GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
@@ -166,10 +188,18 @@ namespace test
 
         m_Shader->SetUniformMat4f("view", m_View);
 
-        for (unsigned int i = 0; i < 10; i++)
+        int numPositions = 10;
+        for (int i = 0; i < m_SphereCount; i++)
         {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation + planetPositions[i]);
-            float angle = 20.0f * i;
+            glm::vec3 pos = planetPositions[i % numPositions];
+            if (i >= numPositions)
+            {
+                float row = (float)(i / numPositions);
+                pos += glm::vec3(row * 3.0f, 0.0f, 0.0f);
+            }
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation + pos);
+            float angle = 20.0f * (float)i;
             model = glm::rotate(model, glm::radians(angle + m_Rotation), glm::vec3(0.2f, 1.0f, 0.3f));
             glm::mat4 mvp = m_Proj * m_View * model;      // order matters
             m_Shader->Bind();
@@ -181,6 +211,14 @@ namespace test
             renderer.DrawSphere(*m_VAO, *m_IBO, *m_Shader);
         }
         m_Skybox->Draw(m_View, m_Proj);
+
+        auto cpuEnd = std::chrono::high_resolution_clock::now();
+        m_CpuFrameTimeMs = std::chrono::duration<float, std::milli>(cpuEnd - cpuStart).count();
+
+        GLCall(glEndQuery(GL_TIME_ELAPSED));
+
+        m_QueryFrontIndex = queryBackIndex;
+        m_QueryReady = true;
     }
 
     void SolarSystem::onImGuiRender()
@@ -200,7 +238,32 @@ namespace test
         if (ImGui::SliderFloat3("Camera Position", &camPos.x, -20.0f, 20.0f))
             m_Camera.SetPosition(camPos);
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Separator();
+
+        // stress test controls
+        ImGui::Text("Performance Monitor");
+        ImGui::SliderInt("Sphere Count", &m_SphereCount, 1, 1000);
+
+        ImGui::Separator();
+
+        ImGui::Text("CPU frame time: %.3f ms", m_CpuFrameTimeMs);
+        ImGui::Text("GPU frame time: %.3f ms", m_GpuFrameTimeMs);
+        ImGui::Text("Draw calls:     %d (spheres) + 1 (skybox)", m_SphereCount);
+
+        float totalMs = 1000.0f / ImGui::GetIO().Framerate;
+        ImGui::Text("Total frame:    %.3f ms (%.1f FPS)", totalMs, ImGui::GetIO().Framerate);
+
+        ImGui::Separator();
+        ImGui::Text("CPU vs GPU:");
+        float maxTime = (m_CpuFrameTimeMs > m_GpuFrameTimeMs) ? m_CpuFrameTimeMs : m_GpuFrameTimeMs;
+        if (maxTime < 0.001f) maxTime = 0.001f;
+        ImGui::ProgressBar(m_CpuFrameTimeMs / maxTime, ImVec2(-1, 0), "CPU");
+        ImGui::ProgressBar(m_GpuFrameTimeMs / maxTime, ImVec2(-1, 0), "GPU");
+
+        if (m_CpuFrameTimeMs > m_GpuFrameTimeMs)
+            ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), ">> CPU-BOUND (bottleneck: draw calls / matrix math)");
+        else
+            ImGui::TextColored(ImVec4(0.4f, 0.4f, 1.0f, 1.0f), ">> GPU-BOUND (bottleneck: shader / fragment count)");
     }
 
 }
